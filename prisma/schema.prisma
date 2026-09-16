@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MEMBER
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  AWAITING_CONFIRMATION
+  PAID
+  REJECTED
+  CANCELLED
+}
+
+enum PaymentProviderType {
+  PIX_MANUAL
+  MERCADO_PAGO
+}
+
+enum MatchTicketMode {
+  ONLINE
+  PHYSICAL
+}
+
+enum TicketStatus {
+  PENDING
+  AWAITING_CONFIRMATION
+  PAID
+  USED
+  CANCELLED
+  REJECTED
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  passwordHash String
+  cpf          String?        @unique
+  phone        String?
+  address      String?
+  city         String?        @default("Palmas")
+  state        String?        @default("TO")
+  zipCode      String?
+  role         Role           @default(MEMBER)
+  memberCode   String         @unique
+  photoUrl     String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  subscription Subscription?
+  tickets      Ticket[]
+}
+
+model Plan {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  name          String
+  description   String
+  priceCents    Int
+  sortOrder     Int            @default(0)
+  highlighted   Boolean        @default(false)
+  active        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  benefits      PlanBenefit[]
+  subscriptions Subscription[]
+}
+
+model Benefit {
+  id        String        @id @default(cuid())
+  title     String
+  createdAt DateTime      @default(now())
+  plans     PlanBenefit[]
+}
+
+model PlanBenefit {
+  planId    String
+  benefitId String
+  plan      Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  benefit   Benefit @relation(fields: [benefitId], references: [id], onDelete: Cascade)
+
+  @@id([planId, benefitId])
+}
+
+model Subscription {
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  planId           String
+  status           SubscriptionStatus @default(PENDING)
+  currentPeriodEnd DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan             Plan               @relation(fields: [planId], references: [id])
+  payments         Payment[]
+}
+
+model Payment {
+  id             String              @id @default(cuid())
+  subscriptionId String
+  amountCents    Int
+  status         PaymentStatus       @default(PENDING)
+  provider       PaymentProviderType @default(PIX_MANUAL)
+  method         String              @default("PIX") // PIX | CARD
+  externalId     String?
+  checkoutUrl    String?
+  pixPayload     String?
+  pixKey         String?
+  receiptUrl     String?
+  description    String?
+  dueDate        DateTime?
+  paidAt         DateTime?
+  confirmedAt    DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  subscription   Subscription        @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+}
+
+model Sponsor {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String
+  website   String?
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model Match {
+  id               String          @id @default(cuid())
+  opponent         String
+  competition      String?
+  round            String?
+  venue            String?
+  dateTime         DateTime
+  isHome           Boolean         @default(true)
+  opponentLogoUrl  String?
+  ticketMode       MatchTicketMode @default(PHYSICAL)
+  whatsappUrl      String?
+  ticketPriceCents Int?
+  availableFor     String?
+  ticketsOnSale    Boolean         @default(true)
+  active           Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  tickets          Ticket[]
+}
+
+model Ticket {
+  id          String       @id @default(cuid())
+  matchId     String
+  userId      String?
+  buyerName   String
+  buyerEmail  String?
+  buyerPhone  String?
+  code        String       @unique
+  status      TicketStatus @default(PENDING)
+  amountCents Int
+  pixPayload  String?
+  pixKey      String?
+  receiptUrl  String?
+  paidAt      DateTime?
+  confirmedAt DateTime?
+  usedAt      DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  match       Match        @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
