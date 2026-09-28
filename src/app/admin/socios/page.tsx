@@ -37,14 +37,14 @@ export default async function AdminSociosPage({
   return (
     <div className="space-y-6">
       <h1 className="font-display text-4xl text-white">Sócios</h1>
-      <form className="flex flex-wrap gap-3">
+      <form className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <input
           name="q"
           defaultValue={q}
           placeholder="Buscar nome, e-mail ou matrícula"
-          className="field max-w-md"
+          className="field sm:max-w-md"
         />
-        <select name="status" defaultValue={status || ""} className="field max-w-xs">
+        <select name="status" defaultValue={status || ""} className="field sm:max-w-xs">
           <option value="">Todos os status</option>
           <option value="ACTIVE">Ativo</option>
           <option value="PENDING">Pendente</option>

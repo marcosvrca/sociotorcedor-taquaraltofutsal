@@ -26,7 +26,7 @@ export default async function BeneficiosPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-4xl text-white">Benefícios</h1>
+        <h1 className="font-display text-3xl text-white sm:text-4xl">Benefícios</h1>
         <p className="mt-1 text-tf-muted">
           Vantagens do plano {sub?.plan.name || "atual"} e parceiros oficiais.
         </p>

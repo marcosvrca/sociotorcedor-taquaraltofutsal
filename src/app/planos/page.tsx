@@ -14,13 +14,13 @@ export default async function PlanosPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="hero-grid relative pb-16 pt-36 court-lines md:pt-40">
+      <div className="hero-grid relative pb-12 pt-[calc(8.5rem+env(safe-area-inset-top))] court-lines sm:pb-16 sm:pt-40 lg:pt-44">
         <SiteHeader />
         <div className="mx-auto max-w-6xl px-4 md:px-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-tf-red">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-tf-red sm:text-sm sm:tracking-[0.2em]">
             {club.programName}
           </p>
-          <h1 className="mt-2 font-display text-5xl text-white md:text-7xl">
+          <h1 className="mt-2 font-display text-5xl text-white sm:text-6xl md:text-7xl">
             Planos
           </h1>
           <p className="mt-4 max-w-2xl text-tf-muted">
@@ -31,7 +31,7 @@ export default async function PlanosPage() {
       </div>
 
       <section className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (
             <PlanCard
               key={plan.id}

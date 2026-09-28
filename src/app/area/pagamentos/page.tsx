@@ -4,7 +4,10 @@ import { requireSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/club";
 import { PaymentActions } from "@/components/payment-actions";
+import { PixQr } from "@/components/pix-qr";
 import { isMercadoPagoConfigured } from "@/lib/payments";
+import { resolvePixPayload } from "@/lib/payments/pix-manual";
+import { paymentStatusLabel } from "@/lib/payments/types";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +27,7 @@ export default async function PagamentosPage({
   });
 
   const settings = await prisma.setting.findMany({
-    where: { key: { in: ["pix_key", "pix_holder"] } },
+    where: { key: { in: ["pix_key", "pix_holder", "pix_city"] } },
   });
   const map = Object.fromEntries(settings.map((s) => [s.key, s.value]));
   const cardEnabled = isMercadoPagoConfigured();
@@ -80,7 +83,22 @@ export default async function PagamentosPage({
           </div>
 
           <div className="space-y-4">
-            {sub.payments.map((p) => (
+            {sub.payments.map((p) => {
+              const pixCode =
+                p.method !== "CARD" &&
+                (p.status === "PENDING" || p.status === "AWAITING_CONFIRMATION")
+                  ? resolvePixPayload({
+                      pixPayload: p.pixPayload,
+                      amountCents: p.amountCents,
+                      description: p.description,
+                      pixKey: p.pixKey || map.pix_key,
+                      pixHolder: map.pix_holder,
+                      pixCity: map.pix_city,
+                      txid: p.id,
+                    })
+                  : null;
+
+              return (
               <div key={p.id} className="panel p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -109,7 +127,7 @@ export default async function PagamentosPage({
                               : "badge-blue"
                       }`}
                     >
-                      {p.status}
+                      {paymentStatusLabel(p.status)}
                     </span>
                   </div>
                 </div>
@@ -143,11 +161,12 @@ export default async function PagamentosPage({
                           {map.pix_holder || "Taquaralto Futsal"}
                         </span>
                       </p>
-                      {p.pixPayload && (
+                      {pixCode && <PixQr value={pixCode} />}
+                      {pixCode && (
                         <div>
                           <p className="mb-1 text-tf-muted">Copia e cola</p>
                           <code className="block break-all rounded bg-black/50 p-3 text-xs text-white/90">
-                            {p.pixPayload}
+                            {pixCode}
                           </code>
                         </div>
                       )}
@@ -174,7 +193,8 @@ export default async function PagamentosPage({
                     </div>
                   )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </>
       ) : (

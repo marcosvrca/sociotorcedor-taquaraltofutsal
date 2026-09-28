@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { restoreOrderStock } from "@/lib/store";
 
 type MpPayment = {
   id?: number;
@@ -18,8 +19,61 @@ async function fetchMpPayment(paymentId: string) {
   return (await res.json()) as MpPayment;
 }
 
+async function applyOrderStatus(orderId: string, mp: MpPayment) {
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) return;
+  if (
+    order.status === "PAID" ||
+    order.status === "FULFILLED" ||
+    order.status === "CANCELLED" ||
+    order.status === "REJECTED"
+  ) {
+    return;
+  }
+
+  if (mp.status === "approved") {
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        status: "PAID",
+        paidAt: order.paidAt || new Date(),
+        confirmedAt: new Date(),
+        externalId: String(mp.id || order.externalId),
+      },
+    });
+    return;
+  }
+
+  if (mp.status === "rejected" || mp.status === "cancelled") {
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        status: "REJECTED",
+        externalId: String(mp.id || order.externalId),
+      },
+    });
+    await restoreOrderStock(order.id);
+    return;
+  }
+
+  if (mp.status === "pending" || mp.status === "in_process") {
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        status: "AWAITING_CONFIRMATION",
+        externalId: String(mp.id || order.externalId),
+      },
+    });
+  }
+}
+
 async function applyMpStatus(mp: MpPayment) {
   if (!mp.external_reference) return;
+  if (mp.external_reference.startsWith("order:")) {
+    await applyOrderStatus(mp.external_reference.slice("order:".length), mp);
+    return;
+  }
+
   const payment = await prisma.payment.findUnique({
     where: { id: mp.external_reference },
   });

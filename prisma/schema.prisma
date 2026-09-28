@@ -46,6 +46,15 @@ enum TicketStatus {
   REJECTED
 }
 
+enum OrderStatus {
+  PENDING
+  AWAITING_CONFIRMATION
+  PAID
+  CANCELLED
+  REJECTED
+  FULFILLED
+}
+
 model User {
   id           String         @id @default(cuid())
   name         String
@@ -64,6 +73,7 @@ model User {
   updatedAt    DateTime       @updatedAt
   subscription Subscription?
   tickets      Ticket[]
+  orders       Order[]
 }
 
 model Plan {
@@ -187,4 +197,68 @@ model Ticket {
   updatedAt   DateTime     @updatedAt
   match       Match        @relation(fields: [matchId], references: [id], onDelete: Cascade)
   user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model Product {
+  id               String      @id @default(cuid())
+  slug             String      @unique
+  name             String
+  description      String
+  priceCents       Int
+  memberPriceCents Int?
+  imageUrl         String?
+  stock            Int         @default(0)
+  sizes            String?
+  sortOrder        Int         @default(0)
+  active           Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  items            OrderItem[]
+}
+
+model Order {
+  id          String              @id @default(cuid())
+  userId      String
+  code        String              @unique
+  status      OrderStatus         @default(PENDING)
+  amountCents Int
+  method      String              @default("PIX")
+  provider    PaymentProviderType @default(PIX_MANUAL)
+  externalId  String?
+  checkoutUrl String?
+  pixPayload  String?
+  pixKey      String?
+  receiptUrl  String?
+  buyerName   String
+  buyerEmail  String?
+  buyerPhone  String?
+  address     String
+  city        String
+  state       String
+  zipCode     String?
+  notes       String?
+  paidAt      DateTime?
+  confirmedAt DateTime?
+  fulfilledAt DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  productId      String?
+  name           String
+  size           String?
+  quantity       Int
+  unitPriceCents Int
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
 }

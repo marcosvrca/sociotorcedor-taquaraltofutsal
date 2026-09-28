@@ -183,6 +183,7 @@ function MatchFields({
 
 export function MatchCreateForm() {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -193,48 +194,79 @@ export function MatchCreateForm() {
     const form = e.currentTarget;
     const fd = new FormData(form);
     const res = await fetch("/api/admin/matches", { method: "POST", body: fd });
+    const data = await res.json().catch(() => ({}));
     setLoading(false);
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
       setMessage(data.error || "Erro ao criar.");
       return;
     }
-    form.reset();
-    setMessage("Jogo criado.");
+    setOpen(false);
+    setMessage("");
     router.refresh();
   }
 
   return (
-    <form onSubmit={onSubmit} className="panel space-y-4 p-5" encType="multipart/form-data">
-      <h2 className="font-display text-2xl text-white">Novo jogo</h2>
-      <MatchFields />
-      <div className="flex items-center gap-3">
-        <button type="submit" className="btn btn-primary !py-2" disabled={loading}>
-          {loading ? "Salvando..." : "Adicionar jogo"}
-        </button>
-        {message && <span className="text-sm text-green-400">{message}</span>}
-      </div>
-    </form>
+    <>
+      <button type="button" className="btn btn-primary !py-2" onClick={() => setOpen(true)}>
+        Cadastrar jogo
+      </button>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 pt-16 backdrop-blur-sm md:items-center md:pt-4"
+          onClick={() => setOpen(false)}
+          role="presentation"
+        >
+          <div
+            className="panel w-full max-w-3xl space-y-4 p-5 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Cadastrar jogo"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-display text-3xl text-white">Cadastrar jogo</h2>
+              <button
+                type="button"
+                className="text-sm text-tf-muted hover:text-white"
+                onClick={() => setOpen(false)}
+              >
+                Fechar
+              </button>
+            </div>
+            <form onSubmit={onSubmit} className="space-y-4" encType="multipart/form-data">
+              <MatchFields />
+              {message && <p className="text-sm text-tf-red">{message}</p>}
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? "Salvando..." : "Cadastrar jogo"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
 export function MatchEditForm({ match }: { match: MatchAdminData }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+    setError(false);
     const fd = new FormData(e.currentTarget);
     const res = await fetch(`/api/admin/matches/${match.id}`, {
       method: "PUT",
       body: fd,
     });
+    const data = await res.json().catch(() => ({}));
     setLoading(false);
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
+      setError(true);
       setMessage(data.error || "Erro ao salvar.");
       return;
     }
@@ -245,8 +277,16 @@ export function MatchEditForm({ match }: { match: MatchAdminData }) {
   async function onDelete() {
     if (!confirm("Excluir este jogo e os ingressos vinculados?")) return;
     setLoading(true);
-    await fetch(`/api/admin/matches/${match.id}`, { method: "DELETE" });
+    setMessage("");
+    setError(false);
+    const res = await fetch(`/api/admin/matches/${match.id}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
     setLoading(false);
+    if (!res.ok) {
+      setError(true);
+      setMessage(data.error || "Não foi possível excluir.");
+      return;
+    }
     router.refresh();
   }
 
@@ -260,6 +300,7 @@ export function MatchEditForm({ match }: { match: MatchAdminData }) {
     }
     setLoading(true);
     setMessage("");
+    setError(false);
     const res = await fetch(
       `/api/admin/matches/${match.id}/reactivate-tickets`,
       { method: "POST" }
@@ -267,6 +308,7 @@ export function MatchEditForm({ match }: { match: MatchAdminData }) {
     const data = await res.json().catch(() => ({}));
     setLoading(false);
     if (!res.ok) {
+      setError(true);
       setMessage(data.error || "Erro ao reativar.");
       return;
     }
@@ -311,7 +353,9 @@ export function MatchEditForm({ match }: { match: MatchAdminData }) {
         >
           Excluir
         </button>
-        {message && <span className="text-sm text-green-400">{message}</span>}
+        {message && (
+          <span className={`text-sm ${error ? "text-tf-red" : "text-green-400"}`}>{message}</span>
+        )}
       </div>
     </form>
   );

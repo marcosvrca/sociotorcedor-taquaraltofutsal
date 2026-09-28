@@ -10,7 +10,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
   }
 
-  const { title } = z.object({ title: z.string().min(3) }).parse(await req.json());
-  const benefit = await prisma.benefit.create({ data: { title } });
-  return NextResponse.json(benefit);
+  try {
+    const { title } = z.object({ title: z.string().min(3) }).parse(await req.json());
+    const benefit = await prisma.benefit.create({ data: { title } });
+    return NextResponse.json(benefit);
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "O benefício precisa de pelo menos 3 caracteres." },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json({ error: "Erro ao cadastrar benefício." }, { status: 400 });
+  }
 }

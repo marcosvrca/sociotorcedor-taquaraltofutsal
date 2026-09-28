@@ -47,10 +47,11 @@ export default async function AdminJogosPage() {
             (online com QR ou físico via WhatsApp).
           </p>
         </div>
-        <AdminTicketsModal tickets={tickets} count={tickets.length} />
+        <div className="flex flex-wrap items-center gap-2">
+          <MatchCreateForm />
+          <AdminTicketsModal tickets={tickets} count={tickets.length} />
+        </div>
       </div>
-
-      <MatchCreateForm />
 
       <div className="space-y-4">
         {matches.map((m) => {

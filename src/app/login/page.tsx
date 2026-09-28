@@ -40,7 +40,7 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="panel mx-auto w-full max-w-md space-y-4 p-6">
+    <form onSubmit={onSubmit} className="panel mx-auto w-full max-w-md space-y-4 p-4 sm:p-6">
       <div>
         <label className="label" htmlFor="email">
           E-mail
@@ -73,7 +73,14 @@ function LoginForm() {
       </button>
       <p className="text-center text-sm text-tf-muted">
         Ainda não é sócio?{" "}
-        <Link href="/cadastro" className="text-white underline">
+        <Link
+          href={
+            params.get("callbackUrl") && callbackUrl.startsWith("/loja")
+              ? `/cadastro?callbackUrl=${encodeURIComponent(callbackUrl)}`
+              : "/cadastro"
+          }
+          className="text-white underline"
+        >
           Cadastre-se
         </Link>
       </p>

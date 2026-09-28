@@ -28,7 +28,7 @@ function assertSafeRelative(relativePath: string): string {
 }
 
 export async function saveUpload(
-  folder: "receipts" | "photos" | "opponents",
+  folder: "receipts" | "photos" | "opponents" | "products",
   filename: string,
   data: Buffer
 ): Promise<string> {

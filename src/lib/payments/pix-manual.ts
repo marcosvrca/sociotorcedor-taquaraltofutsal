@@ -65,6 +65,28 @@ export function buildPixEmvPayload(input: CreateChargeInput): string {
   return payload;
 }
 
+export function resolvePixPayload(input: {
+  pixPayload?: string | null;
+  amountCents: number;
+  description?: string | null;
+  pixKey?: string | null;
+  pixHolder?: string | null;
+  pixCity?: string | null;
+  txid?: string | null;
+}) {
+  if (input.pixPayload) return input.pixPayload;
+  const pixKey = input.pixKey?.trim();
+  if (!pixKey || input.amountCents <= 0) return null;
+  return buildPixEmvPayload({
+    amountCents: input.amountCents,
+    description: input.description || "Pagamento Taquaralto Futsal",
+    pixKey,
+    pixHolder: input.pixHolder || "Taquaralto Futsal",
+    pixCity: input.pixCity || "Palmas",
+    txid: input.txid || undefined,
+  });
+}
+
 export class PixManualProvider implements PaymentProvider {
   readonly name = "PIX_MANUAL" as const;
 

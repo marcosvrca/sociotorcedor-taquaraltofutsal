@@ -4,6 +4,21 @@ import type {
   PaymentStatus,
 } from "@prisma/client";
 
+export function paymentStatusLabel(status: PaymentStatus) {
+  switch (status) {
+    case "PENDING":
+      return "Aguardando PIX";
+    case "AWAITING_CONFIRMATION":
+      return "Comprovante enviado";
+    case "PAID":
+      return "Pago";
+    case "REJECTED":
+      return "Recusado";
+    case "CANCELLED":
+      return "Cancelado";
+  }
+}
+
 export const MP_UNAVAILABLE_MESSAGE =
   "Infelizmente estamos com problemas com esta forma de pagamento, por favor faça o pagamento via pix";
 

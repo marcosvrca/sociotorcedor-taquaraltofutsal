@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/club";
-import { PlanAdminForm, BenefitCreateForm } from "@/components/plan-admin-form";
+import { PlanAdminForm, PlansToolbar } from "@/components/plan-admin-form";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +18,11 @@ export default async function AdminPlanosPage() {
       <div>
         <h1 className="font-display text-4xl text-white">Planos</h1>
         <p className="mt-1 text-tf-muted">
-          Edite preços, descrição e benefícios vinculados.
+          Cadastre planos e benefícios no topo. Edite ou exclua os planos já existentes.
         </p>
       </div>
+
+      <PlansToolbar benefits={benefits.map((b) => ({ id: b.id, title: b.title }))} />
 
       <div className="space-y-6">
         {plans.map((plan) => (
@@ -42,8 +44,6 @@ export default async function AdminPlanosPage() {
           />
         ))}
       </div>
-
-      <BenefitCreateForm />
     </div>
   );
 }

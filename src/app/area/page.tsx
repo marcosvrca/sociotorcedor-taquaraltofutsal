@@ -4,6 +4,7 @@ import { ptBR } from "date-fns/locale";
 import { requireSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/club";
+import { paymentStatusLabel } from "@/lib/payments/types";
 import {
   membershipBadgeClass,
   membershipStatusLabel,
@@ -32,7 +33,7 @@ export default async function AreaDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-4xl text-white">
+        <h1 className="break-words font-display text-3xl text-white sm:text-4xl">
           Olá, {user?.name?.split(" ")[0]}
         </h1>
         <p className="mt-1 text-tf-muted">
@@ -76,6 +77,9 @@ export default async function AreaDashboardPage() {
             <Link href="/area/carteirinha" className="text-white hover:text-tf-red">
               Ver carteirinha →
             </Link>
+            <Link href="/loja" className="text-white hover:text-tf-red">
+              Loja do clube →
+            </Link>
           </div>
         </div>
       </div>
@@ -99,7 +103,7 @@ export default async function AreaDashboardPage() {
                   <p className="font-semibold text-white">
                     {formatBRL(p.amountCents)}
                   </p>
-                  <p className="text-xs uppercase text-tf-muted">{p.status}</p>
+                  <p className="text-xs uppercase text-tf-muted">{paymentStatusLabel(p.status)}</p>
                 </div>
               </div>
             ))

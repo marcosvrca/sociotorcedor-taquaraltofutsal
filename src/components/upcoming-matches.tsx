@@ -53,22 +53,22 @@ export function UpcomingMatches({ matches }: { matches: UpcomingMatch[] }) {
     logoUrl: string | null;
   }) {
     return (
-      <div className="flex w-28 flex-col items-center gap-3 md:w-36">
+      <div className="flex w-[5.5rem] flex-col items-center gap-2 sm:w-28 sm:gap-3 md:w-36">
         {logoUrl ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logoUrl}
               alt={name}
-              className="h-20 w-20 object-contain md:h-28 md:w-28"
+              className="h-16 w-16 object-contain sm:h-20 sm:w-20 md:h-28 md:w-28"
             />
-            <p className="text-xs font-semibold uppercase tracking-wide text-white/80">
+            <p className="break-words text-center text-[11px] font-semibold uppercase tracking-wide text-white/80 sm:text-xs">
               {name}
             </p>
           </>
         ) : (
-          <div className="flex h-20 w-full items-center justify-center md:h-28">
-            <p className="font-display text-center text-lg leading-tight tracking-wide text-white md:text-xl">
+          <div className="flex h-16 w-full items-center justify-center sm:h-20 md:h-28">
+            <p className="break-words text-center font-display text-base leading-tight tracking-wide text-white sm:text-lg md:text-xl">
               {name}
             </p>
           </div>
@@ -80,7 +80,7 @@ export function UpcomingMatches({ matches }: { matches: UpcomingMatch[] }) {
   return (
     <section
       id="jogos"
-      className="relative overflow-hidden border-y border-white/5 bg-[#05070b] py-16 md:py-20"
+      className="relative overflow-hidden border-y border-white/5 bg-[#05070b] py-12 sm:py-16 md:py-20"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-40"
@@ -97,23 +97,22 @@ export function UpcomingMatches({ matches }: { matches: UpcomingMatch[] }) {
         }}
       />
 
-      <div className="relative mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-[180px_1fr] md:px-6 lg:grid-cols-[200px_1fr]">
+      <div className="relative mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-[200px_1fr] lg:gap-10 lg:px-6">
         <aside>
           <h2 className="font-display text-3xl leading-none tracking-wide text-white md:text-4xl">
             Próximos
-            <br />
-            Jogos
+            <br className="hidden lg:block" /> Jogos
           </h2>
-          <ul className="mt-8 space-y-3">
+          <ul className="mt-4 flex gap-2 overflow-x-auto pb-1 lg:mt-8 lg:block lg:space-y-3 lg:overflow-visible">
             {matches.map((m) => {
               const label = format(new Date(m.dateTime), "dd/MM");
               const active = m.id === selected.id;
               return (
-                <li key={m.id}>
+                <li key={m.id} className="shrink-0">
                   <button
                     type="button"
                     onClick={() => setSelectedId(m.id)}
-                    className={`font-display text-2xl tracking-wide transition md:text-3xl ${
+                    className={`rounded-md px-3 py-2 font-display text-xl tracking-wide transition lg:px-0 lg:py-0 lg:text-3xl ${
                       active
                         ? "text-[#c4a574]"
                         : "text-white/35 hover:text-white/70"
@@ -127,8 +126,8 @@ export function UpcomingMatches({ matches }: { matches: UpcomingMatch[] }) {
           </ul>
         </aside>
 
-        <div className="flex flex-col items-center text-center">
-          <p className="font-display text-2xl uppercase tracking-[0.06em] text-white md:text-4xl lg:text-5xl">
+        <div className="flex min-w-0 flex-col items-center text-center">
+          <p className="max-w-full break-words font-display text-xl uppercase leading-tight tracking-[0.04em] text-white sm:text-2xl md:text-4xl lg:text-5xl">
             {title}
             {selected.competition ? (
               <span className="text-white/70">
@@ -150,21 +149,21 @@ export function UpcomingMatches({ matches }: { matches: UpcomingMatch[] }) {
             <p className="mt-1 text-sm lowercase text-white/55">{selected.round}</p>
           )}
 
-          <div className="mt-10 flex w-full max-w-xl items-end justify-center gap-6 md:gap-10">
+          <div className="mt-8 flex w-full max-w-xl items-end justify-center gap-3 sm:mt-10 sm:gap-6 md:gap-10">
             <TeamMark name={homeName} logoUrl={homeLogo} />
-            <p className="pb-10 font-display text-4xl text-white md:pb-14 md:text-5xl">
+            <p className="pb-8 font-display text-3xl text-white sm:pb-10 sm:text-4xl md:pb-14 md:text-5xl">
               X
             </p>
             <TeamMark name={awayName} logoUrl={awayLogo} />
           </div>
 
-          <p className="mt-8 font-display text-xl text-white md:text-2xl">
+          <p className="mt-8 font-display text-lg text-white sm:text-xl md:text-2xl">
             {format(new Date(selected.dateTime), "dd/MM/yyyy 'às' HH:mm", {
               locale: ptBR,
             })}
           </p>
           {selected.venue && (
-            <p className="mt-1 font-display text-lg uppercase tracking-wide text-white md:text-xl">
+            <p className="mt-1 max-w-full break-words font-display text-base uppercase tracking-wide text-white sm:text-lg md:text-xl">
               {selected.venue}
             </p>
           )}
@@ -184,14 +183,14 @@ export function UpcomingMatches({ matches }: { matches: UpcomingMatch[] }) {
                   href={selected.whatsappUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-w-[200px] items-center justify-center rounded-md bg-gradient-to-b from-[#c4a574] to-[#8f7348] px-8 py-3 font-display text-lg tracking-[0.12em] text-white shadow-[0_8px_24px_rgba(196,165,116,0.25)] transition hover:brightness-110"
+                  className="inline-flex w-full max-w-xs items-center justify-center rounded-md bg-gradient-to-b from-[#c4a574] to-[#8f7348] px-5 py-3 text-center font-display text-base tracking-[0.08em] text-white shadow-[0_8px_24px_rgba(196,165,116,0.25)] transition hover:brightness-110 sm:text-lg sm:tracking-[0.12em]"
                 >
                   Compre agora
                 </a>
               ) : selected.ticketMode === "ONLINE" ? (
                 <Link
                   href={`/ingressos/${selected.id}`}
-                  className="inline-flex min-w-[200px] items-center justify-center rounded-md bg-gradient-to-b from-[#c4a574] to-[#8f7348] px-8 py-3 font-display text-lg tracking-[0.12em] text-white shadow-[0_8px_24px_rgba(196,165,116,0.25)] transition hover:brightness-110"
+                  className="inline-flex w-full max-w-xs items-center justify-center rounded-md bg-gradient-to-b from-[#c4a574] to-[#8f7348] px-5 py-3 text-center font-display text-base tracking-[0.08em] text-white shadow-[0_8px_24px_rgba(196,165,116,0.25)] transition hover:brightness-110 sm:text-lg sm:tracking-[0.12em]"
                 >
                   Compre agora
                   {selected.ticketPriceCents != null && selected.ticketPriceCents > 0

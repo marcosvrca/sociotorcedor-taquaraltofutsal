@@ -3,11 +3,54 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+async function seedProducts() {
+  const count = await prisma.product.count();
+  if (count > 0) return;
+
+  await prisma.product.createMany({
+    data: [
+      {
+        slug: "camisa-oficial",
+        name: "Camisa oficial",
+        description: "Camisa do Taquaralto Futsal para jogo e arquibancada.",
+        priceCents: 12990,
+        memberPriceCents: 10990,
+        stock: 30,
+        sizes: "P,M,G,GG",
+        sortOrder: 1,
+        active: true,
+      },
+      {
+        slug: "camisa-treino",
+        name: "Camisa de treino",
+        description: "Modelo de treino, tecido leve para o dia a dia da torcida.",
+        priceCents: 8990,
+        memberPriceCents: 7490,
+        stock: 30,
+        sizes: "P,M,G,GG",
+        sortOrder: 2,
+        active: true,
+      },
+      {
+        slug: "bone",
+        name: "Boné",
+        description: "Boné oficial com o escudo do clube.",
+        priceCents: 4990,
+        memberPriceCents: 3990,
+        stock: 20,
+        sortOrder: 3,
+        active: true,
+      },
+    ],
+  });
+}
+
 async function main() {
   const existingPlans = await prisma.plan.count();
   const force = process.env.FORCE_SEED === "true";
 
   if (existingPlans > 0 && !force) {
+    await seedProducts();
     console.log(
       "Banco já possui dados. Pulei o seed. Use FORCE_SEED=true para recriar."
     );
@@ -18,6 +61,9 @@ async function main() {
     console.log("FORCE_SEED=true — limpando tabelas...");
   }
 
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.product.deleteMany();
   await prisma.ticket.deleteMany();
   await prisma.match.deleteMany();
   await prisma.payment.deleteMany();
@@ -238,9 +284,8 @@ async function main() {
         venue: "Ginásio de Taquaralto",
         dateTime: inDays(7, 19, 30),
         isHome: true,
-        ticketMode: "PHYSICAL",
-        whatsappUrl:
-          "https://wa.me/5563999999999?text=Quero%20ingresso%20Taquaralto",
+        ticketMode: "ONLINE",
+        ticketPriceCents: 1500,
         availableFor: "Sócio Torcedor\nArquibancada",
         ticketsOnSale: true,
         active: true,
@@ -260,6 +305,8 @@ async function main() {
       },
     ],
   });
+
+  await seedProducts();
 
   console.log("Seed OK");
   console.log(

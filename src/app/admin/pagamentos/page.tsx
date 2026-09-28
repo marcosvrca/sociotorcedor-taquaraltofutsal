@@ -3,21 +3,30 @@ import { ptBR } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/club";
 import { AdminPaymentActions } from "@/components/admin-payment-actions";
+import { PixQr } from "@/components/pix-qr";
+import { resolvePixPayload } from "@/lib/payments/pix-manual";
+import { paymentStatusLabel } from "@/lib/payments/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPagamentosPage() {
-  const payments = await prisma.payment.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      subscription: {
-        include: {
-          user: true,
-          plan: true,
+  const [payments, settings] = await Promise.all([
+    prisma.payment.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        subscription: {
+          include: {
+            user: true,
+            plan: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.setting.findMany({
+      where: { key: { in: ["pix_key", "pix_holder", "pix_city"] } },
+    }),
+  ]);
+  const map = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
   return (
     <div className="space-y-6">
@@ -67,14 +76,28 @@ export default async function AdminPagamentosPage() {
                           : "badge-blue"
                   }`}
                 >
-                  {p.status}
+                  {paymentStatusLabel(p.status)}
                 </span>
               </div>
             </div>
             {p.provider === "PIX_MANUAL" &&
               (p.status === "AWAITING_CONFIRMATION" ||
                 p.status === "PENDING") && (
-                <AdminPaymentActions paymentId={p.id} />
+                <div className="mt-4 space-y-4">
+                  {(() => {
+                    const payload = resolvePixPayload({
+                      pixPayload: p.pixPayload,
+                      amountCents: p.amountCents,
+                      description: p.description,
+                      pixKey: p.pixKey || map.pix_key,
+                      pixHolder: map.pix_holder,
+                      pixCity: map.pix_city,
+                      txid: p.id,
+                    });
+                    return payload ? <PixQr value={payload} /> : null;
+                  })()}
+                  <AdminPaymentActions paymentId={p.id} />
+                </div>
               )}
           </div>
         ))}

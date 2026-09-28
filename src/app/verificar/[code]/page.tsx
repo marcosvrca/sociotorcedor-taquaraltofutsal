@@ -80,7 +80,7 @@ export default async function VerificarSocioPage({ params }: Props) {
                   <p className="text-xs uppercase tracking-wider text-tf-muted">
                     Sócio
                   </p>
-                  <p className="font-display text-2xl text-white">{user.name}</p>
+                  <p className="break-words font-display text-2xl text-white">{user.name}</p>
                   <p className="font-mono text-sm text-tf-muted">
                     {user.memberCode}
                   </p>
@@ -110,7 +110,7 @@ export default async function VerificarSocioPage({ params }: Props) {
                 </p>
               </div>
 
-              <dl className="grid grid-cols-2 gap-3 text-sm">
+              <dl className="grid grid-cols-1 gap-3 text-sm min-[380px]:grid-cols-2">
                 <div>
                   <dt className="text-tf-muted">Plano</dt>
                   <dd className="text-white">

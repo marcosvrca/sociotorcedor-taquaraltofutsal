@@ -47,3 +47,33 @@ export async function PUT(
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(
+  _req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
+  }
+
+  const { id } = await context.params;
+  const plan = await prisma.plan.findUnique({
+    where: { id },
+    include: { _count: { select: { subscriptions: true } } },
+  });
+  if (!plan) {
+    return NextResponse.json({ error: "Plano não encontrado." }, { status: 404 });
+  }
+  if (plan._count.subscriptions > 0) {
+    return NextResponse.json(
+      {
+        error: `Este plano tem ${plan._count.subscriptions} sócio(s) vinculado(s). Desative o plano em vez de excluir.`,
+      },
+      { status: 400 }
+    );
+  }
+
+  await prisma.plan.delete({ where: { id } });
+  return NextResponse.json({ ok: true });
+}

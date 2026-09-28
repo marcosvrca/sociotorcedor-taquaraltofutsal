@@ -94,17 +94,17 @@ export function MembershipCard({ data }: { data: MembershipCardData }) {
             height={95}
             className="h-16 w-auto drop-shadow sm:h-20"
           />
-          <div className="text-right">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-white/70 sm:text-xs">
+          <div className="min-w-0 text-right">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-white/70 sm:text-xs sm:tracking-[0.22em]">
               {club.programName}
             </p>
-            <p className="font-display text-xl text-white sm:text-2xl">
+            <p className="break-words font-display text-lg leading-none text-white sm:text-2xl">
               {club.name}
             </p>
           </div>
         </div>
 
-        <div className="relative mt-6 flex gap-4">
+        <div className="relative mt-6 flex gap-3 sm:gap-4">
           <div className="h-28 w-24 shrink-0 overflow-hidden rounded-lg border-2 border-white/40 bg-black/30 sm:h-32 sm:w-28">
             {data.photoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -125,7 +125,7 @@ export function MembershipCard({ data }: { data: MembershipCardData }) {
             <p className="text-[10px] uppercase tracking-wider text-white/70 sm:text-xs">
               Sócio
             </p>
-            <p className="font-display text-2xl leading-tight text-white sm:text-3xl">
+            <p className="break-words font-display text-xl leading-tight text-white sm:text-3xl">
               {data.name}
             </p>
             <div className="mt-3 grid grid-cols-2 gap-2 text-sm">

@@ -14,7 +14,7 @@ export function SponsorsMarquee({ sponsors }: { sponsors: Sponsor[] }) {
         {loop.map((s, i) => (
           <div
             key={`${s.id}-${i}`}
-            className="flex h-24 w-40 shrink-0 items-center justify-center rounded-lg bg-black/50 px-3"
+            className="flex h-20 w-32 shrink-0 items-center justify-center rounded-lg bg-black/50 px-3 sm:h-24 sm:w-40"
             title={s.name}
           >
             <Image

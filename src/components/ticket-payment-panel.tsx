@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
+import { PixQr } from "@/components/pix-qr";
 
 export function TicketPaymentPanel({
   ticketId,
@@ -52,6 +53,7 @@ export function TicketPaymentPanel({
         <p className="mt-1 font-mono text-sm text-tf-muted">{code}</p>
       </div>
 
+      {pixPayload && <PixQr value={pixPayload} />}
       {pixKey && (
         <div>
           <p className="label">Chave PIX</p>

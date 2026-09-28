@@ -38,9 +38,8 @@ async function main() {
         venue: "Ginásio de Taquaralto",
         dateTime: inDays(7, 19, 30),
         isHome: true,
-        ticketMode: "PHYSICAL",
-        whatsappUrl:
-          "https://wa.me/5563999999999?text=Quero%20ingresso%20Taquaralto",
+        ticketMode: "ONLINE",
+        ticketPriceCents: 1500,
         availableFor: "Sócio Torcedor\nArquibancada",
         ticketsOnSale: true,
         active: true,

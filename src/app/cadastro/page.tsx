@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useState } from "react";
 import { club } from "@/lib/club";
+import { safeCallbackUrl } from "@/lib/safe-url";
 
 type PlanOption = {
   id: string;
@@ -18,6 +19,9 @@ function CadastroForm() {
   const router = useRouter();
   const params = useSearchParams();
   const planoSlug = params.get("plano") || "torcida";
+  const callbackUrl = params.get("callbackUrl")
+    ? safeCallbackUrl(params.get("callbackUrl"))
+    : "";
   const [plans, setPlans] = useState<PlanOption[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -58,12 +62,16 @@ function CadastroForm() {
       router.push("/login");
       return;
     }
-    router.push("/area/pagamentos");
+    if (callbackUrl.startsWith("/loja")) {
+      router.push(callbackUrl);
+    } else {
+      router.push("/area/pagamentos");
+    }
     router.refresh();
   }
 
   return (
-    <form onSubmit={onSubmit} className="panel w-full max-w-2xl space-y-4 p-6 md:p-8">
+    <form onSubmit={onSubmit} className="panel w-full max-w-2xl space-y-4 p-4 sm:p-6 md:p-8">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="md:col-span-2">
           <label className="label" htmlFor="name">
@@ -148,7 +156,14 @@ function CadastroForm() {
       </button>
       <p className="text-center text-sm text-tf-muted">
         Já tem conta?{" "}
-        <Link href="/login" className="text-white underline">
+        <Link
+          href={
+            callbackUrl.startsWith("/loja")
+              ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+              : "/login"
+          }
+          className="text-white underline"
+        >
           Entrar
         </Link>
       </p>

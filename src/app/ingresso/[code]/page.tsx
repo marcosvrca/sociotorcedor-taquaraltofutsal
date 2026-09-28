@@ -8,6 +8,7 @@ import { club, formatBRL } from "@/lib/club";
 import { getAppUrl } from "@/lib/env";
 import { TicketPaymentPanel } from "@/components/ticket-payment-panel";
 import { TicketQr } from "@/components/ticket-qr";
+import { resolvePixPayload } from "@/lib/payments/pix-manual";
 import {
   getTicketExpiresAt,
   isTicketExpired,
@@ -80,6 +81,22 @@ export default async function IngressoPage({ params }: Props) {
     getTicketExpiresAt(ticket.match.dateTime).getTime() - 1
   );
 
+  let pixPayload = ticket.pixPayload;
+  if (ticket.status === "PENDING" && !pixPayload) {
+    const settings = await prisma.setting.findMany({
+      where: { key: { in: ["pix_key", "pix_holder", "pix_city"] } },
+    });
+    const map = Object.fromEntries(settings.map((s) => [s.key, s.value]));
+    pixPayload = resolvePixPayload({
+      amountCents: ticket.amountCents,
+      description: `Ingresso ${ticket.code}`,
+      pixKey: ticket.pixKey || map.pix_key,
+      pixHolder: map.pix_holder,
+      pixCity: map.pix_city,
+      txid: ticket.code,
+    });
+  }
+
   return (
     <main className="min-h-screen bg-background px-4 py-10">
       <div className="mx-auto max-w-lg space-y-6">
@@ -99,7 +116,7 @@ export default async function IngressoPage({ params }: Props) {
             <p className="text-xs uppercase tracking-[0.2em] text-tf-muted">
               Meu ingresso
             </p>
-            <h1 className="font-display text-3xl text-white">
+            <h1 className="break-words font-display text-3xl text-white">
               vs {ticket.match.opponent}
             </h1>
             <p className="font-mono text-sm text-tf-muted">{ticket.code}</p>
@@ -113,7 +130,7 @@ export default async function IngressoPage({ params }: Props) {
         >
           <p className="font-display text-2xl text-white">{copy.title}</p>
           <p className="text-sm text-tf-muted">{copy.text}</p>
-          <dl className="grid grid-cols-2 gap-3 pt-2 text-sm">
+          <dl className="grid grid-cols-1 gap-3 pt-2 text-sm min-[380px]:grid-cols-2">
             <div>
               <dt className="text-tf-muted">Comprador</dt>
               <dd className="text-white">{ticket.buyerName}</dd>
@@ -122,7 +139,7 @@ export default async function IngressoPage({ params }: Props) {
               <dt className="text-tf-muted">Valor</dt>
               <dd className="text-white">{formatBRL(ticket.amountCents)}</dd>
             </div>
-            <div className="col-span-2">
+            <div className="min-[380px]:col-span-2">
               <dt className="text-tf-muted">Data do jogo</dt>
               <dd className="text-white">
                 {format(ticket.match.dateTime, "dd/MM/yyyy 'às' HH:mm", {
@@ -131,7 +148,7 @@ export default async function IngressoPage({ params }: Props) {
                 {ticket.match.venue ? ` · ${ticket.match.venue}` : ""}
               </dd>
             </div>
-            <div className="col-span-2">
+            <div className="min-[380px]:col-span-2">
               <dt className="text-tf-muted">Válido até</dt>
               <dd className="text-white">
                 {format(validUntil, "dd/MM/yyyy", { locale: ptBR })}
@@ -145,7 +162,7 @@ export default async function IngressoPage({ params }: Props) {
             ticketId={ticket.id}
             code={ticket.code}
             pixKey={ticket.pixKey}
-            pixPayload={ticket.pixPayload}
+            pixPayload={pixPayload}
             amountLabel={formatBRL(ticket.amountCents)}
             verifyUrl={verifyUrl}
           />
