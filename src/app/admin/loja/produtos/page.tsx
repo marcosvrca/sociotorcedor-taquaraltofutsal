@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/club";
+import { ProductDeleteButton } from "@/components/product-admin-form";
 
 export const dynamic = "force-dynamic";
 
@@ -54,9 +55,12 @@ export default async function AdminProdutosPage() {
                   Estoque {product.stock} · {product.active ? "à venda" : "oculto"}
                 </p>
               </div>
-              <Link href={`/admin/loja/produtos/${product.id}`} className="btn btn-secondary !py-2">
-                Editar
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                <Link href={`/admin/loja/produtos/${product.id}`} className="btn btn-secondary !py-2">
+                  Editar
+                </Link>
+                <ProductDeleteButton id={product.id} name={product.name} />
+              </div>
             </article>
           ))}
         </div>

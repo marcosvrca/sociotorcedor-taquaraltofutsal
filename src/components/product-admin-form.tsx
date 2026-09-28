@@ -146,6 +146,51 @@ export function ProductCreateForm() {
   );
 }
 
+export function ProductDeleteButton({
+  id,
+  name,
+  redirectTo,
+}: {
+  id: string;
+  name: string;
+  redirectTo?: string;
+}) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function onDelete() {
+    if (!window.confirm(`Excluir o produto ${name}? Pedidos já feitos continuam registrados.`)) {
+      return;
+    }
+    setLoading(true);
+    setError("");
+    const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    setLoading(false);
+    if (!res.ok) {
+      setError(data.error || "Não foi possível excluir.");
+      return;
+    }
+    if (redirectTo) router.push(redirectTo);
+    router.refresh();
+  }
+
+  return (
+    <div className="flex flex-col items-start gap-1">
+      <button
+        type="button"
+        className="btn btn-secondary !py-2"
+        disabled={loading}
+        onClick={onDelete}
+      >
+        {loading ? "Excluindo..." : "Excluir"}
+      </button>
+      {error && <p className="text-sm text-tf-red">{error}</p>}
+    </div>
+  );
+}
+
 export function ProductEditForm({ product }: { product: ProductAdminData }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
@@ -173,9 +218,16 @@ export function ProductEditForm({ product }: { product: ProductAdminData }) {
     <form onSubmit={onSubmit} className="panel space-y-4 p-5">
       <h2 className="font-display text-2xl text-white">{product.name}</h2>
       <ProductFields product={product} />
-      <button type="submit" className="btn btn-primary" disabled={loading}>
-        {loading ? "Salvando..." : "Salvar"}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? "Salvando..." : "Salvar"}
+        </button>
+        <ProductDeleteButton
+          id={product.id}
+          name={product.name}
+          redirectTo="/admin/loja/produtos"
+        />
+      </div>
       {message && <p className="text-sm text-white">{message}</p>}
     </form>
   );

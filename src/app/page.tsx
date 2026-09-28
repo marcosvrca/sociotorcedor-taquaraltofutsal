@@ -209,10 +209,6 @@ export default async function HomePage() {
               <h2 className="font-display text-3xl text-white sm:text-4xl md:text-5xl">
                 Pronto para vestir a camisa?
               </h2>
-              <p className="mt-3 text-tf-muted">
-                Cadastre-se, escolha o plano e pague via PIX. Em poucos minutos
-                você já acessa a área do sócio.
-              </p>
               <Link href="/cadastro" className="btn btn-primary mt-6">
                 Quero ser sócio
               </Link>

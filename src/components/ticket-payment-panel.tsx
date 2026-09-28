@@ -29,6 +29,7 @@ export function TicketPaymentPanel({
     setLoading(true);
     setMessage("");
     const form = new FormData(e.currentTarget);
+    form.set("code", code);
     const res = await fetch(`/api/tickets/${ticketId}/mark-paid`, {
       method: "POST",
       body: form,

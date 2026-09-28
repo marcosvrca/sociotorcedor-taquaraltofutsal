@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { formatBRL } from "@/lib/club";
 import { PaymentActions } from "@/components/payment-actions";
 import { PixQr } from "@/components/pix-qr";
-import { isMercadoPagoConfigured } from "@/lib/payments";
 import { resolvePixPayload } from "@/lib/payments/pix-manual";
 import { paymentStatusLabel } from "@/lib/payments/types";
 
@@ -30,14 +29,13 @@ export default async function PagamentosPage({
     where: { key: { in: ["pix_key", "pix_holder", "pix_city"] } },
   });
   const map = Object.fromEntries(settings.map((s) => [s.key, s.value]));
-  const cardEnabled = isMercadoPagoConfigured();
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-4xl text-white">Pagamentos</h1>
         <p className="mt-1 text-tf-muted">
-          Pague via PIX (com comprovante) ou cartão pelo Mercado Pago.
+          Pague a mensalidade via PIX com comprovante.
         </p>
       </div>
 
@@ -68,12 +66,6 @@ export default async function PagamentosPage({
             <p className="mt-1 font-display text-3xl text-white">
               {sub.plan.name} · {formatBRL(sub.plan.priceCents)}/mês
             </p>
-            {!cardEnabled && (
-              <p className="mt-2 text-xs text-tf-muted">
-                Cartão: disponível quando o clube configurar o token do Mercado
-                Pago. PIX permanece ativo.
-              </p>
-            )}
             <PaymentActions
               hasOpenPayment={sub.payments.some(
                 (p) =>

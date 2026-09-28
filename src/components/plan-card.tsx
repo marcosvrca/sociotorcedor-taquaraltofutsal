@@ -21,11 +21,15 @@ export function PlanCard({
   return (
     <article
       className={`panel relative flex h-full flex-col p-6 ${
-        highlighted ? "ring-2 ring-tf-red shadow-[0_0_40px_rgba(225,6,0,0.15)]" : ""
+        highlighted
+          ? "pt-10 ring-2 ring-tf-red shadow-[0_0_40px_rgba(225,6,0,0.15)]"
+          : ""
       }`}
     >
       {highlighted && (
-        <span className="absolute -top-3 left-6 badge badge-red">Mais popular</span>
+        <span className="absolute -top-3 left-6 badge border border-tf-red bg-[#12161e] text-[#ff6b66]">
+          Mais popular
+        </span>
       )}
       <h3 className="font-display text-3xl text-white">{name}</h3>
       <p className="mt-2 text-sm text-tf-muted">{description}</p>

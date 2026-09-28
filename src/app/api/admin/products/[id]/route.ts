@@ -142,3 +142,22 @@ export async function PATCH(
     return NextResponse.json({ error: "Erro ao atualizar estoque." }, { status: 400 });
   }
 }
+
+export async function DELETE(
+  _req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
+  }
+
+  const { id } = await context.params;
+  const existing = await prisma.product.findUnique({ where: { id } });
+  if (!existing) {
+    return NextResponse.json({ error: "Produto não encontrado." }, { status: 404 });
+  }
+
+  await prisma.product.delete({ where: { id } });
+  return NextResponse.json({ ok: true });
+}

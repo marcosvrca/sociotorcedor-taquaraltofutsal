@@ -14,10 +14,21 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
+  let form: FormData;
+  try {
+    form = await req.formData();
+  } catch {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
+  }
+  const providedCode = String(form.get("code") || "").trim();
   const ticket = await prisma.ticket.findUnique({ where: { id } });
 
-  if (!ticket) {
-    return NextResponse.json({ error: "Ingresso não encontrado." }, { status: 404 });
+  if (
+    !ticket ||
+    !providedCode ||
+    providedCode.toUpperCase() !== ticket.code.toUpperCase()
+  ) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
   }
 
   if (ticket.status !== "PENDING") {
@@ -27,7 +38,6 @@ export async function POST(
     );
   }
 
-  const form = await req.formData();
   const file = form.get("receipt");
 
   if (!(file instanceof File) || file.size === 0) {

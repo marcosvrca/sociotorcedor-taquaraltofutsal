@@ -11,7 +11,7 @@ const links = [
   { href: "/admin/jogos", label: "Jogos" },
   { href: "/admin/loja", label: "Loja" },
   { href: "/admin/planos", label: "Planos" },
-  { href: "/admin/config", label: "PIX / Config" },
+  { href: "/admin/config", label: "PIX" },
 ];
 
 export default async function AdminLayout({

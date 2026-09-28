@@ -10,7 +10,6 @@ export function PixConfigForm({
     pix_key: string;
     pix_holder: string;
     pix_city: string;
-    payment_provider: string;
   };
 }) {
   const router = useRouter();
@@ -59,18 +58,6 @@ export function PixConfigForm({
       <div>
         <label className="label">Cidade</label>
         <input name="pix_city" defaultValue={initial.pix_city} className="field" />
-      </div>
-      <div>
-        <label className="label">Provider ativo (informativo)</label>
-        <input
-          name="payment_provider"
-          defaultValue={initial.payment_provider}
-          className="field"
-          readOnly
-        />
-        <p className="mt-1 text-xs text-tf-muted">
-          O provider efetivo vem de `PAYMENT_PROVIDER` no ambiente.
-        </p>
       </div>
       {message && <p className="text-sm text-green-400">{message}</p>}
       <button type="submit" className="btn btn-primary" disabled={loading}>

@@ -193,8 +193,7 @@ export function CheckoutForm({
         )}
         {error && <p className="text-sm text-tf-red">{error}</p>}
         <p className="text-xs text-tf-muted">
-          O PIX usa a mesma chave do clube. O cartão abre o checkout do Mercado Pago,
-          quando estiver configurado.
+          O PIX usa a chave do clube.
         </p>
       </div>
     </form>
