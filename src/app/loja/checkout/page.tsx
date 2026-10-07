@@ -4,6 +4,7 @@ import { SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { CheckoutForm } from "@/components/checkout-form";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getMemberOffer } from "@/lib/member-offer";
 import { isMercadoPagoConfigured } from "@/lib/payments";
 
 export const dynamic = "force-dynamic";
@@ -16,9 +17,9 @@ export default async function CheckoutPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    include: { subscription: true },
   });
   if (!user) redirect("/login?callbackUrl=/loja/checkout");
+  const offer = await getMemberOffer(user.id);
 
   return (
     <div className="min-h-screen">
@@ -31,7 +32,9 @@ export default async function CheckoutPage() {
       </div>
       <section className="mx-auto max-w-6xl px-4 py-10 md:px-6">
         <CheckoutForm
-          member={user.subscription?.status === "ACTIVE"}
+          member={offer.member}
+          productDiscountPercent={offer.productDiscountPercent}
+          planName={offer.planName}
           cardAvailable={isMercadoPagoConfigured()}
           defaults={{
             address: user.address || "",

@@ -1,15 +1,22 @@
 import Link from "next/link";
 import { SiteFooter, SiteHeader } from "@/components/site-chrome";
+import { PlanPriceLines } from "@/components/plan-price-lines";
 import { prisma } from "@/lib/prisma";
-import { formatBRL } from "@/lib/club";
 
 export const dynamic = "force-dynamic";
 
 export default async function LojaPage() {
-  const products = await prisma.product.findMany({
-    where: { active: true },
-    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-  });
+  const [products, plans] = await Promise.all([
+    prisma.product.findMany({
+      where: { active: true },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    }),
+    prisma.plan.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+      select: { name: true, productDiscountPercent: true },
+    }),
+  ]);
 
   return (
     <div className="min-h-screen">
@@ -23,8 +30,8 @@ export default async function LojaPage() {
             Produtos do clube
           </h1>
           <p className="mt-4 max-w-2xl text-tf-muted">
-            Camisas, acessórios e itens oficiais. Sócio com plano ativo paga o
-            preço especial na finalização, com a mesma conta e o mesmo PIX do programa.
+            Camisa torcedor 2026 e garrafa térmica oficial. Sócio Básico tem 5% e
+            Torcida tem 10% em todos os produtos, aplicado no pagamento com a conta ativa.
           </p>
         </div>
       </div>
@@ -33,7 +40,7 @@ export default async function LojaPage() {
         {products.length === 0 ? (
           <p className="text-tf-muted">A loja ainda não tem produtos à venda.</p>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2">
             {products.map((product) => (
               <Link key={product.id} href={`/loja/${product.slug}`} className="panel overflow-hidden">
                 {product.imageUrl ? (
@@ -47,12 +54,7 @@ export default async function LojaPage() {
                 <div className="space-y-2 p-5">
                   <h2 className="font-display text-2xl text-white">{product.name}</h2>
                   <p className="line-clamp-2 text-sm text-tf-muted">{product.description}</p>
-                  <p className="text-white">{formatBRL(product.priceCents)}</p>
-                  {product.memberPriceCents != null && (
-                    <p className="text-sm text-green-400">
-                      Sócio {formatBRL(product.memberPriceCents)}
-                    </p>
-                  )}
+                  <PlanPriceLines priceCents={product.priceCents} plans={plans} />
                   <p className="text-xs uppercase text-tf-muted">
                     {product.stock > 0 ? `${product.stock} em estoque` : "Esgotado"}
                   </p>

@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { AddToCart } from "@/components/add-to-cart";
+import { PlanPriceLines } from "@/components/plan-price-lines";
 import { prisma } from "@/lib/prisma";
-import { formatBRL } from "@/lib/club";
 import { parseSizes } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -14,9 +14,16 @@ export default async function ProdutoPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = await prisma.product.findFirst({
-    where: { slug, active: true },
-  });
+  const [product, plans] = await Promise.all([
+    prisma.product.findFirst({
+      where: { slug, active: true },
+    }),
+    prisma.plan.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+      select: { name: true, productDiscountPercent: true },
+    }),
+  ]);
   if (!product) notFound();
 
   const sizes = parseSizes(product.sizes);
@@ -47,14 +54,7 @@ export default async function ProdutoPage({
         <div className="space-y-5">
           <h1 className="font-display text-5xl text-white">{product.name}</h1>
           <p className="text-tf-muted">{product.description}</p>
-          <div>
-            <p className="font-display text-4xl text-white">{formatBRL(product.priceCents)}</p>
-            {product.memberPriceCents != null && (
-              <p className="mt-1 text-sm text-green-400">
-                Sócio ativo: {formatBRL(product.memberPriceCents)}
-              </p>
-            )}
-          </div>
+          <PlanPriceLines priceCents={product.priceCents} plans={plans} prominent />
           <AddToCart
             productId={product.id}
             name={product.name}

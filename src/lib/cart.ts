@@ -1,3 +1,5 @@
+import { applyPercent } from "@/lib/pricing";
+
 export type CartLine = {
   productId: string;
   name: string;
@@ -60,8 +62,13 @@ export function cartCount(lines = readCart()) {
 
 export function linePrice(
   line: Pick<CartLine, "priceCents" | "memberPriceCents">,
-  member: boolean
+  member: boolean,
+  productDiscountPercent = 0
 ) {
-  if (member && line.memberPriceCents != null) return line.memberPriceCents;
+  if (!member) return line.priceCents;
+  if (productDiscountPercent > 0) {
+    return applyPercent(line.priceCents, productDiscountPercent);
+  }
+  if (line.memberPriceCents != null) return line.memberPriceCents;
   return line.priceCents;
 }

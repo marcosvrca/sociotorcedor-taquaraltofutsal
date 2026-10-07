@@ -7,6 +7,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { club, formatBRL } from "@/lib/club";
+import { getMemberOffer } from "@/lib/member-offer";
+import { applyPercent } from "@/lib/pricing";
 import { TicketPurchaseForm } from "@/components/ticket-purchase-form";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +18,7 @@ type Props = { params: Promise<{ matchId: string }> };
 export default async function ComprarIngressoPage({ params }: Props) {
   const { matchId } = await params;
   const session = await getServerSession(authOptions);
+  const offer = await getMemberOffer(session?.user?.id);
 
   const match = await prisma.match.findFirst({
     where: {
@@ -31,6 +34,14 @@ export default async function ComprarIngressoPage({ params }: Props) {
   if (match.ticketMode === "PHYSICAL" && match.whatsappUrl) {
     redirect(match.whatsappUrl);
   }
+
+  const listPriceCents = match.ticketPriceCents ?? 0;
+  const priceCents = applyPercent(listPriceCents, offer.ticketDiscountPercent);
+  const plans = await prisma.plan.findMany({
+    where: { active: true, ticketDiscountPercent: { gt: 0 } },
+    orderBy: { sortOrder: "asc" },
+    select: { name: true, ticketDiscountPercent: true },
+  });
 
   return (
     <main className="min-h-screen bg-background px-4 py-10">
@@ -57,16 +68,26 @@ export default async function ComprarIngressoPage({ params }: Props) {
               {format(match.dateTime, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
               {match.venue ? ` · ${match.venue}` : ""}
             </p>
-            <p className="mt-1 text-white">
-              {formatBRL(match.ticketPriceCents ?? 0)}
-            </p>
+            <p className="mt-1 text-white">{formatBRL(priceCents)}</p>
+            {offer.member && priceCents < listPriceCents && (
+              <p className="text-sm text-green-400">
+                Plano {offer.planName}: {offer.ticketDiscountPercent}% de desconto
+              </p>
+            )}
           </div>
         </div>
 
         <TicketPurchaseForm
           matchId={match.id}
           opponent={match.opponent}
-          priceCents={match.ticketPriceCents ?? 0}
+          priceCents={priceCents}
+          listPriceCents={listPriceCents}
+          memberPlanName={offer.member ? offer.planName : null}
+          planPrices={plans.map((plan) => ({
+            name: plan.name,
+            percent: plan.ticketDiscountPercent,
+            priceCents: applyPercent(listPriceCents, plan.ticketDiscountPercent),
+          }))}
           defaultName={session?.user?.name || ""}
           defaultEmail={session?.user?.email || ""}
         />

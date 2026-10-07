@@ -4,10 +4,19 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatBRL } from "@/lib/club";
 
+type PlanTicketPrice = {
+  name: string;
+  percent: number;
+  priceCents: number;
+};
+
 type Props = {
   matchId: string;
   opponent: string;
   priceCents: number;
+  listPriceCents?: number;
+  memberPlanName?: string | null;
+  planPrices?: PlanTicketPrice[];
   defaultName?: string;
   defaultEmail?: string;
 };
@@ -16,6 +25,9 @@ export function TicketPurchaseForm({
   matchId,
   opponent,
   priceCents,
+  listPriceCents,
+  memberPlanName = null,
+  planPrices = [],
   defaultName = "",
   defaultEmail = "",
 }: Props) {
@@ -55,6 +67,21 @@ export function TicketPurchaseForm({
           Ingresso digital vs {opponent}
           {priceCents > 0 ? ` · ${formatBRL(priceCents)}` : " · cortesia"}
         </p>
+        {memberPlanName && listPriceCents != null && listPriceCents > priceCents && (
+          <p className="mt-1 text-sm text-green-400">
+            Plano {memberPlanName}: {formatBRL(priceCents)} (de {formatBRL(listPriceCents)})
+          </p>
+        )}
+        {!memberPlanName && planPrices.length > 0 && (
+          <ul className="mt-2 space-y-1 text-sm text-green-400">
+            {planPrices.map((plan) => (
+              <li key={plan.name}>
+                {plan.name}: {formatBRL(plan.priceCents)} ({plan.percent}% no ingresso). Entre na
+                conta de sócio para aplicar.
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <div>
         <label className="label">Nome completo</label>

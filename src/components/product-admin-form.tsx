@@ -50,7 +50,10 @@ function ProductFields({
           />
         </div>
         <div>
-          <label className="label">Preço sócio (R$)</label>
+          <label className="label">Preço sócio fixo (R$)</label>
+          <p className="mb-1 text-xs text-tf-muted">
+            Básico e Torcida usam o percentual do plano. Deixe em branco.
+          </p>
           <input
             name="memberPriceReais"
             type="number"

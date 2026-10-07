@@ -16,10 +16,14 @@ type Defaults = {
 
 export function CheckoutForm({
   member,
+  productDiscountPercent = 0,
+  planName = null,
   cardAvailable,
   defaults,
 }: {
   member: boolean;
+  productDiscountPercent?: number;
+  planName?: string | null;
   cardAvailable: boolean;
   defaults: Defaults;
 }) {
@@ -35,7 +39,7 @@ export function CheckoutForm({
   }, []);
 
   const total = lines.reduce(
-    (sum, line) => sum + linePrice(line, member) * line.quantity,
+    (sum, line) => sum + linePrice(line, member, productDiscountPercent) * line.quantity,
     0
   );
 
@@ -166,12 +170,15 @@ export function CheckoutForm({
                 {line.quantity}× {line.name}
                 {line.size ? ` (${line.size})` : ""}
               </span>
-              <span>{formatBRL(linePrice(line, member) * line.quantity)}</span>
+              <span>{formatBRL(linePrice(line, member, productDiscountPercent) * line.quantity)}</span>
             </li>
           ))}
         </ul>
-        {member && (
-          <p className="text-xs text-green-400">Desconto de sócio aplicado no servidor.</p>
+        {member && productDiscountPercent > 0 && (
+          <p className="text-xs text-green-400">
+            Desconto de {productDiscountPercent}% do plano {planName || "sócio"} aplicado no
+            pagamento.
+          </p>
         )}
         <p className="font-display text-4xl text-white">{formatBRL(total)}</p>
         <button type="submit" className="btn btn-primary w-full" disabled={loading !== null}>

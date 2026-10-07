@@ -45,7 +45,7 @@ export default async function AdminProdutosPage() {
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-white">{product.name}</p>
                 <p className="text-sm text-tf-muted">
-                  {formatBRL(product.priceCents)}
+                  {product.priceCents > 0 ? formatBRL(product.priceCents) : "Preço em definição"}
                   {product.memberPriceCents != null
                     ? ` · sócio ${formatBRL(product.memberPriceCents)}`
                     : ""}

@@ -18,18 +18,26 @@ type PlanOption = {
 function CadastroForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const planoSlug = params.get("plano") || "torcida";
+  const requestedPlan = params.get("plano") || "basico";
   const callbackUrl = params.get("callbackUrl")
     ? safeCallbackUrl(params.get("callbackUrl"))
     : "";
   const [plans, setPlans] = useState<PlanOption[]>([]);
+  const [planSlug, setPlanSlug] = useState(requestedPlan);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch("/api/plans")
       .then((r) => r.json())
-      .then(setPlans)
+      .then((list: PlanOption[]) => {
+        setPlans(list);
+        setPlanSlug((current) =>
+          list.some((plan) => plan.slug === current)
+            ? current
+            : list.find((plan) => plan.slug === "basico")?.slug || list[0]?.slug || ""
+        );
+      })
       .catch(() => setPlans([]));
   }, []);
 
@@ -45,7 +53,7 @@ function CadastroForm() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setLoading(false);
       setError(data.error || "Não foi possível cadastrar.");
@@ -105,7 +113,8 @@ function CadastroForm() {
             id="planSlug"
             name="planSlug"
             className="field"
-            defaultValue={planoSlug}
+            value={planSlug}
+            onChange={(e) => setPlanSlug(e.target.value)}
           >
             {plans.map((p) => (
               <option key={p.id} value={p.slug}>

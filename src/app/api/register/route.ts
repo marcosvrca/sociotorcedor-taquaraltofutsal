@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { generateMemberCode } from "@/lib/club";
@@ -51,6 +52,17 @@ export async function POST(req: Request) {
     const pixHolder = map.pix_holder || "Taquaralto Futsal";
     const pixCity = map.pix_city || "Palmas";
 
+    const cpf = data.cpf?.replace(/\D/g, "") || null;
+    if (cpf) {
+      const cpfOwner = await prisma.user.findUnique({ where: { cpf } });
+      if (cpfOwner) {
+        return NextResponse.json(
+          { error: "Já existe uma conta com este CPF." },
+          { status: 400 }
+        );
+      }
+    }
+
     const passwordHash = await bcrypt.hash(data.password, 10);
     const provider = getPixProvider();
     const charge = await provider.createCharge({
@@ -73,7 +85,7 @@ export async function POST(req: Request) {
         name: data.name,
         email: data.email.toLowerCase().trim(),
         passwordHash,
-        cpf: data.cpf || null,
+        cpf,
         phone: data.phone || null,
         address: data.address || null,
         memberCode: generateMemberCode(),
@@ -107,6 +119,24 @@ export async function POST(req: Request) {
         { error: err.issues[0]?.message || "Dados inválidos." },
         { status: 400 }
       );
+    }
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
+      const target = String(err.meta?.target ?? "");
+      if (target.includes("cpf")) {
+        return NextResponse.json(
+          { error: "Já existe uma conta com este CPF." },
+          { status: 400 }
+        );
+      }
+      if (target.includes("email")) {
+        return NextResponse.json(
+          { error: "Já existe uma conta com este e-mail." },
+          { status: 400 }
+        );
+      }
     }
     console.error(err);
     return NextResponse.json(

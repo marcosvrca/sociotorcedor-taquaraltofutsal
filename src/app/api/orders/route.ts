@@ -18,6 +18,7 @@ import {
   restoreOrderStock,
   unitPriceCents,
 } from "@/lib/store";
+import { getMemberOffer } from "@/lib/member-offer";
 
 const schema = z.object({
   method: z.enum(["PIX", "CARD"]).default("PIX"),
@@ -50,13 +51,12 @@ export async function POST(req: Request) {
     const method = body.method;
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      include: { subscription: true },
     });
     if (!user) {
       return NextResponse.json({ error: "Conta não encontrada." }, { status: 401 });
     }
 
-    const member = user.subscription?.status === "ACTIVE";
+    const offer = await getMemberOffer(user.id);
     const lines: {
       productId: string;
       name: string;
@@ -89,6 +89,12 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
+      if (product.priceCents <= 0) {
+        return NextResponse.json(
+          { error: `${product.name} ainda não tem preço de venda.` },
+          { status: 400 }
+        );
+      }
       if (product.stock < item.quantity) {
         return NextResponse.json(
           { error: `Estoque insuficiente de ${product.name}.` },
@@ -100,7 +106,7 @@ export async function POST(req: Request) {
         name: product.name,
         size: sizes.length ? size : null,
         quantity: item.quantity,
-        unitPriceCents: unitPriceCents(product, member),
+        unitPriceCents: unitPriceCents(product, offer),
       });
     }
 

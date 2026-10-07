@@ -4,6 +4,8 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateTicketCode } from "@/lib/club";
+import { getMemberOffer } from "@/lib/member-offer";
+import { applyPercent } from "@/lib/pricing";
 import { getPixProvider } from "@/lib/payments";
 
 const schema = z.object({
@@ -34,7 +36,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const amountCents = match.ticketPriceCents ?? 0;
+    const offer = await getMemberOffer(session?.user?.id);
+    const listPriceCents = match.ticketPriceCents ?? 0;
+    const amountCents = applyPercent(listPriceCents, offer.ticketDiscountPercent);
     const code = generateTicketCode();
 
     if (amountCents <= 0) {

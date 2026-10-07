@@ -1,5 +1,6 @@
 import type { OrderStatus, Product } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { applyPercent } from "@/lib/pricing";
 
 export function slugify(value: string) {
   const slug = value
@@ -31,9 +32,13 @@ export function formatSizes(sizes: string[]) {
 
 export function unitPriceCents(
   product: Pick<Product, "priceCents" | "memberPriceCents">,
-  member: boolean
+  offer: { member: boolean; productDiscountPercent: number }
 ) {
-  if (member && product.memberPriceCents != null) return product.memberPriceCents;
+  if (!offer.member) return product.priceCents;
+  if (offer.productDiscountPercent > 0) {
+    return applyPercent(product.priceCents, offer.productDiscountPercent);
+  }
+  if (product.memberPriceCents != null) return product.memberPriceCents;
   return product.priceCents;
 }
 

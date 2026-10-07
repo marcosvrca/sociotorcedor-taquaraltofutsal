@@ -2,19 +2,13 @@ import { getServerSession } from "next-auth";
 import { SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { CartView } from "@/components/cart-view";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getMemberOffer } from "@/lib/member-offer";
 
 export const dynamic = "force-dynamic";
 
 export default async function CarrinhoPage() {
   const session = await getServerSession(authOptions);
-  let member = false;
-  if (session?.user) {
-    const sub = await prisma.subscription.findUnique({
-      where: { userId: session.user.id },
-    });
-    member = sub?.status === "ACTIVE";
-  }
+  const offer = await getMemberOffer(session?.user?.id);
 
   return (
     <div className="min-h-screen">
@@ -25,7 +19,11 @@ export default async function CarrinhoPage() {
         </div>
       </div>
       <section className="mx-auto max-w-3xl px-4 py-10 md:px-6">
-        <CartView member={member} />
+        <CartView
+          member={offer.member}
+          productDiscountPercent={offer.productDiscountPercent}
+          planName={offer.planName}
+        />
       </section>
       <SiteFooter />
     </div>

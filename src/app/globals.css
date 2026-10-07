@@ -33,6 +33,7 @@
 }
 
 html {
+  color-scheme: dark;
   scroll-behavior: smooth;
   overflow-x: clip;
 }
@@ -118,6 +119,16 @@ a {
 .field:focus {
   outline: 2px solid var(--tf-blue);
   outline-offset: 1px;
+}
+
+select.field {
+  color-scheme: dark;
+}
+
+select.field option,
+select.field optgroup {
+  background-color: #11161f;
+  color: #f4f6fa;
 }
 
 .label {

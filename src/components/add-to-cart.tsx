@@ -44,6 +44,10 @@ export function AddToCart({
     router.push("/loja/carrinho");
   }
 
+  if (priceCents <= 0) {
+    return null;
+  }
+
   if (stock <= 0) {
     return <p className="text-sm text-tf-muted">Produto esgotado.</p>;
   }

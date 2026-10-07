@@ -5,7 +5,8 @@ import { PlanCard } from "@/components/plan-card";
 import { SponsorsMarquee } from "@/components/sponsors-marquee";
 import { UpcomingMatches } from "@/components/upcoming-matches";
 import { prisma } from "@/lib/prisma";
-import { club, formatBRL } from "@/lib/club";
+import { PlanPriceLines } from "@/components/plan-price-lines";
+import { club } from "@/lib/club";
 
 export const dynamic = "force-dynamic";
 
@@ -109,16 +110,16 @@ export default async function HomePage() {
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
             {
-              title: "Prioridade nos jogos",
-              text: "Descontos e preferência na compra de ingressos conforme o seu plano.",
+              title: "Loja oficial",
+              text: "5% no plano Básico e 10% no plano Torcida em todos os produtos do Taquaralto.",
             },
             {
-              title: "Clube de vantagens",
-              text: "Descontos e benefícios com patrocinadores oficiais do Taquaralto.",
+              title: "Ingressos",
+              text: "10% no Básico e 15% no plano Torcida no ingresso dos jogos.",
             },
             {
-              title: "Carteirinha digital",
-              text: "Acesse sua área, pagamentos e identificação de sócio pelo celular.",
+              title: "Parceiros",
+              text: "5% no Básico e 10% no plano Torcida com os parceiros. O plano Torcida entra no sorteio mensal de brindes.",
             },
           ].map((item) => (
             <div key={item.title} className="panel p-6">
@@ -146,7 +147,7 @@ export default async function HomePage() {
               Comparar todos →
             </Link>
           </div>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
             {plans.map((plan) => (
               <PlanCard
                 key={plan.id}
@@ -191,11 +192,19 @@ export default async function HomePage() {
           </Link>
         </div>
         {products.length > 0 && (
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {products.map((product) => (
               <Link key={product.id} href={`/loja/${product.slug}`} className="panel p-5">
                 <h3 className="font-display text-2xl text-white">{product.name}</h3>
-                <p className="mt-2 text-sm text-tf-muted">{formatBRL(product.priceCents)}</p>
+                <div className="mt-2">
+                  <PlanPriceLines
+                    priceCents={product.priceCents}
+                    plans={plans.map((plan) => ({
+                      name: plan.name,
+                      productDiscountPercent: plan.productDiscountPercent,
+                    }))}
+                  />
+                </div>
               </Link>
             ))}
           </div>

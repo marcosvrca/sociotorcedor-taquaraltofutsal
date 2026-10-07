@@ -1,58 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { syncOffer } from "./offer";
 
 const prisma = new PrismaClient();
-
-async function seedProducts() {
-  const count = await prisma.product.count();
-  if (count > 0) return;
-
-  await prisma.product.createMany({
-    data: [
-      {
-        slug: "camisa-oficial",
-        name: "Camisa oficial",
-        description: "Camisa do Taquaralto Futsal para jogo e arquibancada.",
-        priceCents: 12990,
-        memberPriceCents: 10990,
-        stock: 30,
-        sizes: "P,M,G,GG",
-        sortOrder: 1,
-        active: true,
-      },
-      {
-        slug: "camisa-treino",
-        name: "Camisa de treino",
-        description: "Modelo de treino, tecido leve para o dia a dia da torcida.",
-        priceCents: 8990,
-        memberPriceCents: 7490,
-        stock: 30,
-        sizes: "P,M,G,GG",
-        sortOrder: 2,
-        active: true,
-      },
-      {
-        slug: "bone",
-        name: "Boné",
-        description: "Boné oficial com o escudo do clube.",
-        priceCents: 4990,
-        memberPriceCents: 3990,
-        stock: 20,
-        sortOrder: 3,
-        active: true,
-      },
-    ],
-  });
-}
 
 async function main() {
   const existingPlans = await prisma.plan.count();
   const force = process.env.FORCE_SEED === "true";
 
   if (existingPlans > 0 && !force) {
-    await seedProducts();
+    await syncOffer(prisma);
     console.log(
-      "Banco já possui dados. Pulei o seed. Use FORCE_SEED=true para recriar."
+      "Oferta atualizada: planos Básico (R$ 29,90) e Torcida (R$ 49,90), com a loja nos dois produtos oficiais."
     );
     return;
   }
@@ -75,67 +34,8 @@ async function main() {
   await prisma.setting.deleteMany();
   await prisma.user.deleteMany();
 
-  const benefits = await Promise.all(
-    [
-      "Carteirinha digital de sócio",
-      "Conteúdos exclusivos do Taquaralto Futsal",
-      "Clube de vantagens com parceiros",
-      "Desconto em produtos oficiais",
-      "Desconto em ingressos dos jogos mandantes",
-      "Prioridade na compra de ingressos",
-      "Acesso a ações e experiências exclusivas",
-      "1 dependente incluso no plano",
-      "Benefícios na Academia Oficial Fit Taquaralto",
-      "Prioridade máxima em pré-vendas e eventos",
-    ].map((title) => prisma.benefit.create({ data: { title } }))
-  );
-
-  const [b0, b1, b2, b3, b4, b5, b6, b7, b8, b9] = benefits;
-
-  const digital = await prisma.plan.create({
-    data: {
-      slug: "digital",
-      name: "Digital",
-      description:
-        "Para quem vive o Taquaralto de qualquer lugar e quer fazer parte da torcida oficial.",
-      priceCents: 1990,
-      sortOrder: 1,
-      benefits: {
-        create: [b0, b1, b2, b3].map((b) => ({ benefitId: b.id })),
-      },
-    },
-  });
-
-  const torcida = await prisma.plan.create({
-    data: {
-      slug: "torcida",
-      name: "Torcida",
-      description:
-        "O plano ideal para quem vai aos jogos e quer prioridade e descontos na arquibancada.",
-      priceCents: 3990,
-      sortOrder: 2,
-      highlighted: true,
-      benefits: {
-        create: [b0, b1, b2, b3, b4, b5, b6].map((b) => ({ benefitId: b.id })),
-      },
-    },
-  });
-
-  const familia = await prisma.plan.create({
-    data: {
-      slug: "familia",
-      name: "Família",
-      description:
-        "Mais benefícios para você e quem torce junto — com vantagens em parceiros locais.",
-      priceCents: 6990,
-      sortOrder: 3,
-      benefits: {
-        create: [b0, b1, b2, b3, b4, b5, b6, b7, b8, b9].map((b) => ({
-          benefitId: b.id,
-        })),
-      },
-    },
-  });
+  const plans = await syncOffer(prisma);
+  const full = plans.full;
 
   const sponsors = [
     { name: "Durax", logoUrl: "/sponsors/durax.jpg", sortOrder: 1 },
@@ -237,12 +137,12 @@ async function main() {
     await prisma.subscription.create({
       data: {
         userId: member.id,
-        planId: torcida.id,
+        planId: full.id,
         status: "ACTIVE",
         currentPeriodEnd: periodEnd,
         payments: {
           create: {
-            amountCents: torcida.priceCents,
+            amountCents: full.priceCents,
             status: "PAID",
             provider: "PIX_MANUAL",
             description: "Mensalidade Torcida",
@@ -306,8 +206,6 @@ async function main() {
     ],
   });
 
-  await seedProducts();
-
   console.log("Seed OK");
   console.log(
     "Admin:",
@@ -317,7 +215,7 @@ async function main() {
   if (memberPassword) {
     console.log("Sócio demo: socio@demo.com (senha = DEMO_MEMBER_PASSWORD ou socio123)");
   }
-  console.log("Planos:", digital.slug, torcida.slug, familia.slug);
+  console.log("Planos: basico, full");
 }
 
 main()

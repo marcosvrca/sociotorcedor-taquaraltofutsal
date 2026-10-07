@@ -5,7 +5,15 @@ import { useEffect, useState } from "react";
 import { formatBRL } from "@/lib/club";
 import { cartLineKey, linePrice, readCart, writeCart, type CartLine } from "@/lib/cart";
 
-export function CartView({ member }: { member: boolean }) {
+export function CartView({
+  member,
+  productDiscountPercent = 0,
+  planName = null,
+}: {
+  member: boolean;
+  productDiscountPercent?: number;
+  planName?: string | null;
+}) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
 
@@ -35,15 +43,15 @@ export function CartView({ member }: { member: boolean }) {
   }
 
   const total = lines.reduce(
-    (sum, line) => sum + linePrice(line, member) * line.quantity,
+    (sum, line) => sum + linePrice(line, member, productDiscountPercent) * line.quantity,
     0
   );
 
   return (
     <div className="space-y-4">
-      {member && (
+      {member && productDiscountPercent > 0 && (
         <p className="text-sm text-green-400">
-          Preço de sócio ativo aplicado nos itens com desconto.
+          Desconto de {productDiscountPercent}% do plano {planName || "sócio"} aplicado.
         </p>
       )}
       {lines.map((line) => (
@@ -68,7 +76,7 @@ export function CartView({ member }: { member: boolean }) {
               <p className="font-semibold text-white">{line.name}</p>
               {line.size && <p className="text-sm text-tf-muted">Tam. {line.size}</p>}
               <p className="text-sm text-white/80">
-                {formatBRL(linePrice(line, member))}
+                {formatBRL(linePrice(line, member, productDiscountPercent))}
               </p>
             </div>
           </div>

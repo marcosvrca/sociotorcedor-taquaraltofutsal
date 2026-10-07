@@ -81,8 +81,11 @@ model Plan {
   slug          String         @unique
   name          String
   description   String
-  priceCents    Int
-  sortOrder     Int            @default(0)
+  priceCents              Int
+  productDiscountPercent  Int            @default(0)
+  ticketDiscountPercent   Int            @default(0)
+  partnerDiscountPercent  Int            @default(0)
+  sortOrder               Int            @default(0)
   highlighted   Boolean        @default(false)
   active        Boolean        @default(true)
   createdAt     DateTime       @default(now())

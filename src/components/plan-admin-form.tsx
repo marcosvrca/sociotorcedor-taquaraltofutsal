@@ -11,6 +11,9 @@ type PlanData = {
   slug: string;
   description: string;
   priceCents: number;
+  productDiscountPercent: number;
+  ticketDiscountPercent: number;
+  partnerDiscountPercent: number;
   sortOrder: number;
   highlighted: boolean;
   active: boolean;
@@ -45,6 +48,9 @@ export function PlanAdminForm({
         name: form.get("name"),
         description: form.get("description"),
         priceReais: form.get("priceReais"),
+        productDiscountPercent: Number(form.get("productDiscountPercent") || 0),
+        ticketDiscountPercent: Number(form.get("ticketDiscountPercent") || 0),
+        partnerDiscountPercent: Number(form.get("partnerDiscountPercent") || 0),
         sortOrder: Number(form.get("sortOrder")),
         highlighted: form.get("highlighted") === "on",
         active: form.get("active") === "on",
@@ -111,6 +117,39 @@ export function PlanAdminForm({
             defaultValue={plan.description}
             className="field min-h-20"
             required
+          />
+        </div>
+        <div>
+          <label className="label">Desconto na loja (%)</label>
+          <input
+            name="productDiscountPercent"
+            type="number"
+            min="0"
+            max="100"
+            defaultValue={plan.productDiscountPercent}
+            className="field"
+          />
+        </div>
+        <div>
+          <label className="label">Desconto no ingresso (%)</label>
+          <input
+            name="ticketDiscountPercent"
+            type="number"
+            min="0"
+            max="100"
+            defaultValue={plan.ticketDiscountPercent}
+            className="field"
+          />
+        </div>
+        <div>
+          <label className="label">Desconto com parceiros (%)</label>
+          <input
+            name="partnerDiscountPercent"
+            type="number"
+            min="0"
+            max="100"
+            defaultValue={plan.partnerDiscountPercent}
+            className="field"
           />
         </div>
         <div>
@@ -228,6 +267,9 @@ export function PlansToolbar({ benefits }: { benefits: Benefit[] }) {
         name: form.get("name"),
         description: form.get("description"),
         priceReais: form.get("priceReais"),
+        productDiscountPercent: Number(form.get("productDiscountPercent") || 0),
+        ticketDiscountPercent: Number(form.get("ticketDiscountPercent") || 0),
+        partnerDiscountPercent: Number(form.get("partnerDiscountPercent") || 0),
         sortOrder: Number(form.get("sortOrder") || 0),
         highlighted: form.get("highlighted") === "on",
         active: form.get("active") === "on",
@@ -292,6 +334,18 @@ export function PlansToolbar({ benefits }: { benefits: Benefit[] }) {
               <div className="md:col-span-2">
                 <label className="label">Descrição</label>
                 <textarea name="description" className="field min-h-20" required />
+              </div>
+              <div>
+                <label className="label">Desconto na loja (%)</label>
+                <input name="productDiscountPercent" type="number" min="0" max="100" defaultValue={0} className="field" />
+              </div>
+              <div>
+                <label className="label">Desconto no ingresso (%)</label>
+                <input name="ticketDiscountPercent" type="number" min="0" max="100" defaultValue={0} className="field" />
+              </div>
+              <div>
+                <label className="label">Desconto com parceiros (%)</label>
+                <input name="partnerDiscountPercent" type="number" min="0" max="100" defaultValue={0} className="field" />
               </div>
               <div>
                 <label className="label">Ordem</label>

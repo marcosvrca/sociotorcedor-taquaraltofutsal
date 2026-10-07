@@ -31,7 +31,7 @@ export default async function PlanosPage() {
       </div>
 
       <section className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {plans.map((plan) => (
             <PlanCard
               key={plan.id}

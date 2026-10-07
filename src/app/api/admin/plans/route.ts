@@ -5,10 +5,15 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/store";
 
+const percent = z.coerce.number().int().min(0).max(100);
+
 const schema = z.object({
   name: z.string().min(2),
   description: z.string().min(5),
   priceReais: z.coerce.number().positive(),
+  productDiscountPercent: percent.default(0),
+  ticketDiscountPercent: percent.default(0),
+  partnerDiscountPercent: percent.default(0),
   sortOrder: z.coerce.number().int(),
   highlighted: z.boolean(),
   active: z.boolean(),
@@ -39,6 +44,9 @@ export async function POST(req: Request) {
         name: data.name,
         description: data.description,
         priceCents: Math.round(data.priceReais * 100),
+        productDiscountPercent: data.productDiscountPercent,
+        ticketDiscountPercent: data.ticketDiscountPercent,
+        partnerDiscountPercent: data.partnerDiscountPercent,
         sortOrder: data.sortOrder,
         highlighted: data.highlighted,
         active: data.active,

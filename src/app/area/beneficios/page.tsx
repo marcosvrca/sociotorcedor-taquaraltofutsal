@@ -48,6 +48,12 @@ export default async function BeneficiosPage() {
 
       <div>
         <h2 className="font-display text-2xl text-white">Parceiros</h2>
+        {sub?.plan.partnerDiscountPercent ? (
+          <p className="mt-2 text-sm text-tf-muted">
+            Seu plano dá {sub.plan.partnerDiscountPercent}% de desconto com os parceiros do
+            Taquaralto.
+          </p>
+        ) : null}
         <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
           {sponsors.map((s) => (
             <div
